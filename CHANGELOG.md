@@ -2,6 +2,11 @@
 
 ## 35 Release Notes
 
+### HTTP Workflow Inputs for Shared File System and Google Pipelines API Version 2 Backends
+
+`http` and `https` workflow inputs are now supported for shared filesystem and Google Pipelines API (PAPI) version 2
+backends. Configuration details are described [here](http://cromwell.readthedocs.io/en/develop/filesystems/HTTP).
+
 ### Bug Fixes
 
 #### API

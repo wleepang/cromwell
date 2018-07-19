@@ -82,6 +82,7 @@ abstract class BatchActor[C](val flushRate: FiniteDuration,
       processHead(data)
     case Event(ShutdownCommand, data) =>
       logger.info(s"{} Shutting down: ${data.weight} queued messages to process", self.path.name)
+      logger.info(s"${data.innerQueue.mkString(s"${self.path.name} queue:\n  ","\n  ", "")}")
       shuttingDown = true
       processHead(data)
   }
@@ -97,6 +98,7 @@ abstract class BatchActor[C](val flushRate: FiniteDuration,
     // Process is complete and we're shutting down so process even if we're under the batch size.
     case Event(ProcessingComplete, data) if shuttingDown =>
       logger.info(s"{} Shutting down: processing ${data.weight} queued messages", self.path.name)
+      logger.info(s"${data.innerQueue.mkString(s"${self.path.name} queue:\n  ","\n  ", "")}")
       processHead(data)
     // Processing is complete, re-process only if needed    
     case Event(ProcessingComplete, data) if !shuttingDown =>
@@ -138,6 +140,14 @@ abstract class BatchActor[C](val flushRate: FiniteDuration,
         processNonEmptyHead(NonEmptyVector(headOfHead, head.tail))
         goto(Processing) using newQueue
       case None =>
+        println(
+          s"""|
+              |FINDME: No head!
+              |Confirming data is empty = '$data'
+              |Confirming newQueue is empty = '$newQueue'
+              |Should have gon to WaitingToProcess though
+              |
+              |""".stripMargin)
         goto(WaitingToProcess) using data
     }
 

@@ -14,6 +14,7 @@ import $ivy.`org.http4s::http4s-circe:0.19.0-SNAPSHOT`
 import $ivy.`io.circe::circe-literal:0.7.0`
 import $ivy.`io.spray::spray-json:1.3.4`
 
+import com.google.auth.oauth2.ComputeEngineCredentials
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageOptions
@@ -54,7 +55,8 @@ case class MarthaResponse(dos: DosObject, googleServiceAccount: JsObject)
 @main
 def dosUrlResolver(dosUrl: String, downloadLoc: String) : Unit = {
   val dosResloverObj = for {
-    marthaResObj <- resolveDosThroughMartha(dosUrl)
+    marthaUrl <- Uri.fromString(sys.env("MARTHA_URL")).toTry
+    marthaResObj <- resolveDosThroughMartha(dosUrl, marthaUrl)
     gcsUrl <- extractFirstGcsUrl(marthaResObj.dos.data_object.urls)
     _ <- downloadFileFromGcs(gcsUrl, marthaResObj.googleServiceAccount.toString, downloadLoc)
   } yield()
@@ -70,12 +72,12 @@ def dosUrlResolver(dosUrl: String, downloadLoc: String) : Unit = {
 }
 
 
-def resolveDosThroughMartha(dosUrl: String) : Try[MarthaResponse] = {
+def resolveDosThroughMartha(dosUrl: String, marthaUrl: Uri) : Try[MarthaResponse] = {
   import MarthaResponseJsonSupport._
 
   val requestBody = json"""{"url":$dosUrl}"""
 
-  val credentials = GoogleCredentials.getApplicationDefault()
+  val credentials = ComputeEngineCredentials.create()
   credentials.refreshAccessToken()
   val accessToken = credentials.getAccessToken()
 
@@ -84,7 +86,7 @@ def resolveDosThroughMartha(dosUrl: String) : Try[MarthaResponse] = {
     //request to fake Martha
     postRequest <- Request[IO](
       method = Method.POST,
-      uri = Uri.uri("http://us-central1-dvoet-mock-marthav2.cloudfunctions.net/martha_v2"),
+      uri = marthaUrl,
       headers = Headers(Header("Authorization", s"bearer $accessToken")))
       .withBody(requestBody)
     httpResponse <- httpClient.expect[String](postRequest)
@@ -111,7 +113,7 @@ def downloadFileFromGcs(gcsUrl: String, serviceAccount: String, downloadLoc: Str
   val gcsBucket = gcsUrlArray(0)
 
   Try {
-    val credentials = GoogleCredentials.fromStream(new ByteArrayInputStream(serviceAccount.getBytes()))
+    val credentials =  GoogleCredentials.fromStream(new ByteArrayInputStream(serviceAccount.getBytes()))
       .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"))
     val storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService()
     val blob = storage.get(gcsBucket, fileToBeLocalized)

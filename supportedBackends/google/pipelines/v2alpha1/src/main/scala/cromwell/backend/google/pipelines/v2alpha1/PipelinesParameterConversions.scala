@@ -10,6 +10,7 @@ import cromwell.backend.google.pipelines.v2alpha1.api.ActionBuilder._
 import cromwell.backend.google.pipelines.v2alpha1.api.ActionCommands._
 import cromwell.backend.google.pipelines.v2alpha1.api.{ActionBuilder, ActionFlag}
 import simulacrum.typeclass
+import collection.JavaConverters._
 
 import scala.language.implicitConversions
 @typeclass trait ToParameter[A <: PipelinesParameter] {
@@ -34,13 +35,16 @@ trait PipelinesParameterConversions {
         val config = ConfigFactory.load
         val demoDosDockerImage = config.getString("demo.dos.localization.docker-image")
         val demoDosCommandTemplate = config.getString("demo.dos.localization.command-template")
+        val demoDosMarthaUrl = config.getString("demo.dos.martha.url")
         val demoDosCommand = demoDosCommandTemplate
           .replace(s"$${dosPath}", fileInput.cloudPath.escape)
           .replace(s"$${containerPath}", fileInput.containerPath.escape)
+        val marthaEnv = Map("MARTHA_URL" -> demoDosMarthaUrl)
         ActionBuilder
           .withImage(demoDosDockerImage)
           .withCommand("/bin/sh", "-c", demoDosCommand)
           .withMounts(mounts)
+          .setEnvironment(marthaEnv.asJava)
           .withLabels(labels)
           .setEntrypoint("")
       } else {

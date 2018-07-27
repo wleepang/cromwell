@@ -96,8 +96,8 @@ final class BcsAsyncBackendJobExecutionActor(override val standardParams: Standa
     }
 
     // Collect all WomFiles from inputs to the call.
-    val callInputFiles: Map[FullyQualifiedName, Seq[WomFile]] = jobDescriptor.fullyQualifiedInputs mapValues {
-      _.collectAsSeq { case w: WomFile => w }
+    val callInputFiles: Map[FullyQualifiedName, Seq[WomFile]] = jobDescriptor.fullyQualifiedInputs map { case (name, value) =>
+      name -> value.collectAsSeq { case w: WomFile => w }
     }
 
     callInputFiles ++ writeFunctionInputs

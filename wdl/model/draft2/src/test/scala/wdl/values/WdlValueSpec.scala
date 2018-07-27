@@ -171,7 +171,8 @@ class WdlValueSpec extends FlatSpec with Matchers {
   private def describe(womValue: WomValue): String = {
     womValue match {
       case WdlCallOutputsObject(call, outputs) =>
-        s"WdlCallOutputsObject(${call.unqualifiedName}, ${outputs.mapValues(_.toWomString)})"
+        val womStringified = outputs.map { case (k, v) => k -> v.toWomString }
+        s"WdlCallOutputsObject(${call.unqualifiedName}, $womStringified)"
       case _ => womValue.toWomString
     }
   }

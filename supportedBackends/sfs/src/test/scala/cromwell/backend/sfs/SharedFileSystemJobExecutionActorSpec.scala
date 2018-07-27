@@ -251,7 +251,7 @@ class SharedFileSystemJobExecutionActorSpec extends TestKitSuite("SharedFileSyst
       // If this is not the case, more context/logic will need to be moved to the backend so it can figure it out by itself
       val symbolMaps: Map[LocallyQualifiedName, WomInteger] = Map("intNumber" -> WomInteger(shard))
 
-      val evaluatedAttributes = call.callable.runtimeAttributes.attributes.mapValues(_.evaluateValue(Map.empty, NoIoFunctionSet).getOrElse(fail("Can't evaluate runtime attribute")))
+      val evaluatedAttributes = call.callable.runtimeAttributes.attributes.map { case (k, v) => k -> v.evaluateValue(Map.empty, NoIoFunctionSet).getOrElse(fail("Can't evaluate runtime attribute")) }
       val runtimeAttributes: Map[LocallyQualifiedName, WomValue] = RuntimeAttributeDefinition.addDefaultsToAttributes(runtimeAttributeDefinitions, WorkflowOptions.empty)(evaluatedAttributes)
 
       val jobDescriptor: BackendJobDescriptor =

@@ -148,7 +148,7 @@ class SparkRuntimeAttributesSpec extends WordSpecLike with Matchers {
         val staticValues = workflowDescriptor.knownValues.map {
           case (outputPort, resolvedInput) => outputPort.name -> resolvedInput
         }
-        val ra = call.callable.runtimeAttributes.attributes mapValues { _.evaluateValue(staticValues, NoIoFunctionSet) }
+        val ra = call.callable.runtimeAttributes.attributes map { case (k, v) => k -> v.evaluateValue(staticValues, NoIoFunctionSet) }
         ra.sequence.getOrElse(fail("Failed to evaluate runtime attributes"))
     }
   }

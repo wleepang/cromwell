@@ -63,7 +63,7 @@ case class WorkflowMetadata(value: Map[String, JsValue]) extends AnyVal {
 object WorkflowMetadata {
   def fromConfig(config: Config): ErrorOr[WorkflowMetadata] = {
     config.extract[Map[String, Option[String]]] match {
-      case Result.Success(m) => Valid(WorkflowMetadata(m mapValues { _.map(JsString.apply).getOrElse(JsNull) }))
+      case Result.Success(m) => Valid(WorkflowMetadata(m map { case (k, v) => k -> v.map(JsString.apply).getOrElse(JsNull) }))
       case Result.Failure(_) => invalidNel(s"Metadata block can not be converted to a Map: $config")
     }
   }

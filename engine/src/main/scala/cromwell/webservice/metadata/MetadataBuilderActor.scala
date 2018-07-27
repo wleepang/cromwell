@@ -93,7 +93,7 @@ object MetadataBuilderActor {
      *    ...
      * )
      */
-    val callsGroupedByFQNAndIndex = callsGroupedByFQN mapValues { _ groupBy { _.key.jobKey.get.index } }
+    val callsGroupedByFQNAndIndex = callsGroupedByFQN map { case (k, v) => k -> v.groupBy { _.key.jobKey.get.index } }
     /*
      * Map(
      *    "fqn" -> Map(
@@ -107,13 +107,14 @@ object MetadataBuilderActor {
      *    ...
      * )
      */
-    val callsGroupedByFQNAndIndexAndAttempt = callsGroupedByFQNAndIndex mapValues { _ mapValues { _ groupBy { _.key.jobKey.get.attempt } } }
+    val callsGroupedByFQNAndIndexAndAttempt = callsGroupedByFQNAndIndex map { case (k, v) =>
+      k -> (v map { case (k2, v2) => k2 -> v2.groupBy { _.key.jobKey.get.attempt } } ) }
 
     val eventsToAttemptFunction = Function.tupled(eventsToAttemptMetadata(expandedValues) _)
     val attemptToIndexFunction = (attemptMetadataToIndexMetadata _).tupled
 
-    val callsMap = callsGroupedByFQNAndIndexAndAttempt mapValues { _ mapValues { _ map eventsToAttemptFunction } map attemptToIndexFunction } mapValues { md =>
-      JsArray(md.toVector.sortBy(_.index) flatMap { _.metadata })
+    val callsMap = callsGroupedByFQNAndIndexAndAttempt map { case (k, v) => k -> (v map { case (k2, v2) => k2 -> (v2 map eventsToAttemptFunction) } map attemptToIndexFunction )} map { case (k, md) =>
+      k -> JsArray(md.toVector.sortBy(_.index) flatMap { _.metadata })
     }
 
     val wrappedCalls = JsObject(Map(WorkflowMetadataKeys.Calls -> JsObject(callsMap)))
@@ -129,7 +130,7 @@ object MetadataBuilderActor {
     * Parse a Seq of MetadataEvent into a full Json metadata response.
     */
   private def parse(events: Seq[MetadataEvent], expandedValues: Map[String, JsValue]): JsObject = {
-    JsObject(events.groupBy(_.key.workflowId.toString) mapValues parseWorkflowEvents(includeCallsIfEmpty = true, expandedValues))
+    JsObject(events.groupBy(_.key.workflowId.toString) map { case (k, v) => k -> parseWorkflowEvents(includeCallsIfEmpty = true, expandedValues)(v) })
   }
 
   def uniqueActorName: String = List("MetadataBuilderActor", UUID.randomUUID()).mkString("-")

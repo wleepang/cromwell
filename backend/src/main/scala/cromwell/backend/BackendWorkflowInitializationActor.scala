@@ -77,7 +77,7 @@ object BackendWorkflowInitializationActor {
                                  ): ValidatedNel[RuntimeAttributeValidationFailure, Unit] = {
 
       //This map append will overwrite default key/values with runtime settings upon key collisions
-      val lookups = defaultRuntimeAttributes.mapValues(_.asWomExpression) ++ runtimeAttributes
+      val lookups = defaultRuntimeAttributes.map { case (name, value) => name -> value.asWomExpression } ++ runtimeAttributes
 
       runtimeAttributeValidators.toList.traverse{
         case (attributeName, validator) =>

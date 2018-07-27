@@ -45,7 +45,7 @@ object WorkflowQueryParameters {
     // The values are the keys capitalized as actually given to the API, which is what will be used in any
     // error messages.
     val keysByCanonicalCapitalization: Map[String, Set[String]] =
-      rawParameters map { _._1 } groupBy { _.toLowerCase.capitalize } mapValues { _.toSet }
+      rawParameters map { _._1 } groupBy { _.toLowerCase.capitalize } map { case (k, v) => k -> v.toSet }
 
     keysByCanonicalCapitalization.keys.toSet -- WorkflowQueryKey.ValidKeys match {
       case set if set.nonEmpty =>

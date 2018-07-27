@@ -42,7 +42,7 @@ object TryUtil {
   }
 
   def sequenceMap[T, U](tries: Map[T, Try[U]], prefixErrorMessage: String = ""): Try[Map[T, U]] = {
-    def unbox = tries mapValues { _.get }
+    def unbox = tries map { case (t, try_) => t -> try_.get }
     sequenceIterable(tries.values, unbox _, prefixErrorMessage)
   }
 

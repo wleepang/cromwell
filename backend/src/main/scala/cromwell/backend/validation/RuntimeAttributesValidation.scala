@@ -134,7 +134,7 @@ object RuntimeAttributesValidation {
     * @return The keys and extracted values.
     */
   def toMetadataStrings(validatedRuntimeAttributes: ValidatedRuntimeAttributes): Map[String, String] = {
-    val attributeOptions: Map[String, Option[Any]] = validatedRuntimeAttributes.attributes.mapValues(unpackOption)
+    val attributeOptions: Map[String, Option[Any]] = validatedRuntimeAttributes.attributes.map { case (k, v) => k -> unpackOption(v) }
 
     val attributes: Map[String, String] = attributeOptions collect {
       case (name, Some(values: Traversable[_])) => (name, values.mkString(","))

@@ -420,7 +420,7 @@ class PipelinesApiAsyncBackendJobExecutionActorSpec extends TestKitSuite("JesAsy
           WomFileMapper.mapWomFiles(testActorRef.underlyingActor.mapCommandLineWomFile, Set.empty)(womValue).get
         }
 
-        val mappedInputs = jobDescriptor.localInputs mapValues gcsPathToLocal
+        val mappedInputs = jobDescriptor.localInputs map { case (k, v) => k -> gcsPathToLocal(v) }
 
         mappedInputs(stringKey) match {
           case WomString(v) => assert(v.equalsIgnoreCase(stringVal.value))
@@ -874,7 +874,7 @@ class PipelinesApiAsyncBackendJobExecutionActorSpec extends TestKitSuite("JesAsy
 
     val jesBackend = testActorRef.underlyingActor
 
-    val actual = jesBackend.startMetadataKeyValues.mapValues(_.toString)
+    val actual = jesBackend.startMetadataKeyValues.map { case (k, v) => k -> v.toString }
     actual should be(
       Map(
         "backendLabels:cromwell-workflow-id" -> s"cromwell-$workflowId",

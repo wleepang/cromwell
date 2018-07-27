@@ -122,7 +122,7 @@ trait BcsTestUtilSpec extends TestKitSuite with FlatSpecLike with Matchers with 
   val mockPathBuilders = List(mockPathBuiler)
   lazy val workflowDescriptor =  buildWdlWorkflowDescriptor(
     SampleWdl.HelloWorld.workflowSource(),
-    inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.mapValues(JsString.apply)).compactPrint)
+    inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.map { case (k, v) => k -> JsString(v) }).compactPrint)
   )
   lazy val jobKey = {
     val call = workflowDescriptor.callable.taskCallNodes.head

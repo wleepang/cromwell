@@ -66,14 +66,13 @@ object BiscayneValueEvaluators {
                               (implicit expressionValueEvaluator: ValueEvaluator[ExpressionElement]): ErrorOr[EvaluatedValue[_ <: WomValue]] = {
       processValidatedSingleValue[WomArray, WomMap](expressionValueEvaluator.evaluateValue(a.param, inputs, ioFunctionSet, forCommandInstantiationOptions)(expressionValueEvaluator)) {
         case WomArray(WomArrayType(WomPairType(_: WomPrimitiveType, _)), values) =>
-          val validPairs: ErrorOr[List[(WomValue, WomValue)]] = values.toList traverse {
+          val validPairs: ErrorOr[List[(WomValue, WomValue)]] = values.toList.traverse[ErrorOr, (WomValue, WomValue)] {
             case WomPair(l, r) => (l, r).validNel
             case other => s"Unexpected array element. Expected a Pair[X, Y] but array contained ${other.toWomString}]".invalidNel
           }
           validPairs flatMap { kvpairs =>
-            val grouped: Map[WomValue, WomArray] = kvpairs.groupBy(_._1).mapValues(v => WomArray(v.map(_._2)))
+            val grouped: Map[WomValue, WomArray] = kvpairs.groupBy(_._1).map { case (k, v) => k -> WomArray(v.map(_._2)) }
             EvaluatedValue(WomMap(grouped), Seq.empty).validNel
-
           }
 
         case WomArray(womType@WomArrayType(WomPairType(x, _)), _) => s"Cannot evaluate 'collect_by_key' on type ${womType.toDisplayString}. Keys must be primitive but got ${x.toDisplayString}.".invalidNel

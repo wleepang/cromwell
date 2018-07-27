@@ -26,7 +26,7 @@ object LabelsManagerActor {
   def processLabelsResponse(workflowId: WorkflowId, labels: Map[String, String]): JsObject = {
     JsObject(Map(
       WorkflowMetadataKeys.Id -> JsString(workflowId.toString),
-      WorkflowMetadataKeys.Labels -> JsObject(labels mapValues JsString.apply)
+      WorkflowMetadataKeys.Labels -> JsObject(labels map { case (k, v) => k -> JsString.apply(v) })
     ))
   }
 

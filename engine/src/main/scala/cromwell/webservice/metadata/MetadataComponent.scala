@@ -42,7 +42,7 @@ object MetadataComponent {
 
   implicit val metadataComponentJsonWriter: JsonWriter[MetadataComponent] = JsonWriter.func2Writer[MetadataComponent] {
     case MetadataList(values) => JsArray(values.values.toVector map { _.toJson(this.metadataComponentJsonWriter) })
-    case MetadataObject(values) => JsObject(values.mapValues(_.toJson(this.metadataComponentJsonWriter)))
+    case MetadataObject(values) => JsObject(values.map { case (k , v) => k -> v.toJson(this.metadataComponentJsonWriter)})
     case primitive: MetadataPrimitive => metadataPrimitiveJsonWriter.write(primitive)
     case MetadataEmptyComponent => JsObject.empty
     case MetadataNullComponent => JsNull

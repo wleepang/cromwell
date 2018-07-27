@@ -84,26 +84,26 @@ object EcmaScriptUtil {
     * TODO: Once custom types are supported as WomValue, this custom method won't be required.
     *
     * @param expr      The javascript expression.
-    * @param rawValues A map filled with WOM values.
-    * @param mapValues A map of maps filled with WOM values of various types.
+    * @param rawVals   A map filled with WOM values.
+    * @param mapVals   A map of maps filled with WOM values of various types.
     * @param encoder   Encodes wom values to javascript.
     * @param decoder   Decodes wom values from javascript.
     * @return The result of the expression.
     */
   def evalStructish(expr: String,
-                    rawValues: (String, WomValue),
-                    mapValues: Map[String, Map[String, WomValue]] = Map.empty,
+                    rawVals: (String, WomValue),
+                    mapVals: Map[String, Map[String, WomValue]] = Map.empty,
                     encoder: EcmaScriptEncoder,
                     decoder: CwlEcmaScriptDecoder = new CwlEcmaScriptDecoder): ErrorOr[WomValue] = {
     def evaluate = evalRaw(expr) { (context, scope) =>
 
-      val (key, value) = rawValues
+      val (key, value) = rawVals
 
       val jsValue = encoder.encode(value)
       val field = writeValue(jsValue)(context, scope)
       ScriptableObject.putProperty(scope, key, field)
 
-      val jsMap = mapValues.mapValues{ _.mapValues(encoder.encode) }
+      val jsMap = mapVals.map { case (k, v) => k ->  v.map { case (k2, v2) => k2 -> encoder.encode(v2) } }
 
       jsMap foreach {
         case (scopeId, nestedMap) =>

@@ -57,8 +57,8 @@ final case class TesTask(jobDescriptor: BackendJobDescriptor,
 
   private val callInputFiles: Map[FullyQualifiedName, Seq[WomFile]] = jobDescriptor
     .fullyQualifiedInputs
-    .mapValues {
-      _.collectAsSeq { case w: WomFile => w }
+    .map { case (k, v) =>
+      k -> v.collectAsSeq { case w: WomFile => w }
     }
 
   def inputs(commandLineValueMapper: WomValue => WomValue): Seq[Input] = {

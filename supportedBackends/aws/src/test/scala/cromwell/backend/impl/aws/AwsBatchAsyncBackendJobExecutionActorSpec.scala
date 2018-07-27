@@ -442,7 +442,7 @@ class AwsBatchAsyncBackendJobExecutionActorSpec extends TestKitSuite("AwsBatchAs
           WomFileMapper.mapWomFiles(testActorRef.underlyingActor.mapCommandLineWomFile, exceptions = Set.empty)(womValue).get
         }
 
-        val mappedInputs = jobDescriptor.localInputs mapValues pathToLocal
+        val mappedInputs = jobDescriptor.localInputs map { case (k, v) => k -> pathToLocal(v) }
 
         mappedInputs(stringKey) match {
           case WomString(v) => assert(v.equalsIgnoreCase(stringVal.value))

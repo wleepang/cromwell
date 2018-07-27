@@ -193,20 +193,20 @@ class AwsBatchAsyncBackendJobExecutionActor(override val standardParams: Standar
     }
 
     // Collect all WomFiles from inputs to the call.
-    val callInputFiles: Map[FullyQualifiedName, Seq[WomFile]] = jobDescriptor.fullyQualifiedInputs mapValues {
-      womFile =>
-        val arrays: Seq[WomArray] = womFile collectAsSeq {
-          case womFile: WomFile =>
-            val files: List[WomSingleFile] = DirectoryFunctions
-              .listWomSingleFiles(womFile, callPaths.workflowPaths)
-              .toTry(s"Error getting single files for $womFile").get
-            WomArray(WomArrayType(WomSingleFileType), files)
-        }
+    val callInputFiles: Map[FullyQualifiedName, Seq[WomFile]] = jobDescriptor.fullyQualifiedInputs map { case (name, womFile) =>
+      val arrays: Seq[WomArray] = womFile collectAsSeq {
+        case womFile: WomFile =>
+          val files: List[WomSingleFile] = DirectoryFunctions
+            .listWomSingleFiles(womFile, callPaths.workflowPaths)
+            .toTry(s"Error getting single files for $womFile").get
+          WomArray(WomArrayType(WomSingleFileType), files)
+      }
 
-        arrays.flatMap(_.value).collect {
-          case womFile: WomFile => womFile
-        }
-    } map identity // <-- unlazy the mapValues
+      val files = arrays.flatMap(_.value).collect {
+        case womFile: WomFile => womFile
+      }
+      name -> files
+    }
 
     val callInputInputs = callInputFiles flatMap {
       case (name, files) => inputsFromWomFiles(name, files, files.map(relativeLocalizationPath), jobDescriptor)

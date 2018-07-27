@@ -54,7 +54,7 @@ class AwsBatchCallPathsSpec extends TestKitSuite with FlatSpecLike with Matchers
 
     val workflowDescriptor = buildWdlWorkflowDescriptor(
       SampleWdl.HelloWorld.workflowSource(),
-      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.mapValues(JsString.apply)).compactPrint)
+      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.map { case (k, v) => k -> JsString(v) }).compactPrint)
     )
     val jobDescriptorKey = firstJobDescriptorKey(workflowDescriptor)
     val configuration = new AwsBatchConfiguration(AwsBatchBackendConfigurationDescriptor)
@@ -73,7 +73,7 @@ class AwsBatchCallPathsSpec extends TestKitSuite with FlatSpecLike with Matchers
 
     val workflowDescriptor = buildWdlWorkflowDescriptor(
       SampleWdl.HelloWorld.workflowSource(),
-      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.mapValues(JsString.apply)).compactPrint)
+      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.map { case (k, v) => k -> JsString(v) }).compactPrint)
     )
     val jobDescriptorKey = firstJobDescriptorKey(workflowDescriptor)
     val configuration = new AwsBatchConfiguration(AwsBatchBackendConfigurationDescriptor)
@@ -96,7 +96,7 @@ class AwsBatchCallPathsSpec extends TestKitSuite with FlatSpecLike with Matchers
 
     val workflowDescriptor = buildWdlWorkflowDescriptor(
       SampleWdl.HelloWorld.workflowSource(),
-      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.mapValues(JsString.apply)).compactPrint)
+      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.map { case (k, v) => k -> JsString(v) }).compactPrint)
     )
     val jobDescriptorKey = firstJobDescriptorKey(workflowDescriptor)
     val configuration = new AwsBatchConfiguration(AwsBatchBackendConfigurationDescriptor)

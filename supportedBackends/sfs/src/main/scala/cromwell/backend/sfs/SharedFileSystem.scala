@@ -163,7 +163,7 @@ trait SharedFileSystem extends PathFactory {
    */
   def localizeInputs(inputsRoot: Path, docker: Boolean)(inputs: WomEvaluatedCallInputs): Try[WomEvaluatedCallInputs] = {
     TryUtil.sequenceMap(
-      inputs mapValues WomFileMapper.mapWomFiles(localizeWomFile(inputsRoot, docker), Set.empty),
+      inputs map { case (k, v) => k -> WomFileMapper.mapWomFiles(localizeWomFile(inputsRoot, docker), Set.empty)(v) },
       "Failures during localization"
     ) recoverWith {
       case e => Failure(new IOException(e.getMessage) with CromwellFatalExceptionMarker)

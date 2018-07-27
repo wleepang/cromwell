@@ -134,7 +134,7 @@ final case class SealedExecutionStore private[stores](private val statusStore: M
   */
 sealed abstract class ExecutionStore private[stores](statusStore: Map[JobKey, ExecutionStatus], val needsUpdate: Boolean) {
   // View of the statusStore more suited for lookup based on status
-  lazy val store: Map[ExecutionStatus, List[JobKey]] = statusStore.groupBy(_._2).mapValues(_.keys.toList)
+  lazy val store: Map[ExecutionStatus, List[JobKey]] = statusStore.groupBy(_._2).map { case (k, v) => k -> v.keys.toList }
   lazy val queuedJobsAboveThreshold = queuedJobs > MaxJobsToStartPerTick
 
   def keyForNode(node: GraphNode): Option[JobKey] = {

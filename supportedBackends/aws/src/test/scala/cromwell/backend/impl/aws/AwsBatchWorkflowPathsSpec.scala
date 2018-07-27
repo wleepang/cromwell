@@ -52,7 +52,7 @@ class AwsBatchWorkflowPathsSpec extends TestKitSuite with FlatSpecLike with Matc
 
     val workflowDescriptor = buildWdlWorkflowDescriptor(
       SampleWdl.HelloWorld.workflowSource(),
-      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.mapValues(JsString.apply)).compactPrint)
+      inputFileAsJson = Option(JsObject(SampleWdl.HelloWorld.rawInputs.map { case (k, v) => k -> JsString(v) }).compactPrint)
     )
     val configuration = new AwsBatchConfiguration(AwsBatchBackendConfigurationDescriptor)
 

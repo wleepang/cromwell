@@ -77,7 +77,7 @@ case class WorkflowFinalizationActor(workflowIdForLogging: WorkflowId,
     case Event(StartFinalizationCommand, _) =>
       val backendFinalizationActors = Try {
         for {
-          (backend, calls) <- workflowDescriptor.backendAssignments.groupBy(_._2).mapValues(_.keySet)
+          (backend, calls) <- workflowDescriptor.backendAssignments.groupBy(_._2).map { case (k, v) => k -> v.keySet }
           props <- CromwellBackends.backendLifecycleFactoryActorByName(backend).map(
             _.workflowFinalizationActorProps(workflowDescriptor.backendDescriptor, ioActor, calls, filterJobExecutionsForBackend(calls), workflowOutputs, initializationData.get(backend))
           ).valueOr(errors => throw AggregatedMessageException("Cannot validate backend factories", errors.toList))

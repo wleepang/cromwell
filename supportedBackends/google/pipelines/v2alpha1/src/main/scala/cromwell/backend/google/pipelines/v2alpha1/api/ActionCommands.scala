@@ -94,7 +94,7 @@ object ActionCommands {
     val withoutProject = ""
     val withProject = s"-u ${path.projectId}"
 
-    s"""${f(withoutProject)} 2> gsutil_output.txt; RC_GSUTIL=$$?; if [[ "$$RC_GSUTIL" -eq 1 ]]; then
-       | grep "$BucketIsRequesterPaysErrorMessage" gsutil_output.txt && echo "Retrying with user project"; ${f(withProject)}; fi """.stripMargin
+    s"""${f(withoutProject)} 2> gsutil_output.txt; RC_GSUTIL=$$?; cat gsutil_output.txt; if [[ "$$RC_GSUTIL" -eq 1 ]]; then
+       | grep "$BucketIsRequesterPaysErrorMessage" gsutil_output.txt && echo "Retrying with user project" && ${f(withProject)}; fi """.stripMargin
   }
 }

@@ -1,5 +1,6 @@
 package languages.wdl.draft2
 
+import java.security.MessageDigest
 import java.util.concurrent.{Callable, TimeUnit}
 
 import cats.data.EitherT.fromEither
@@ -57,7 +58,11 @@ class WdlDraft2LanguageFactory(override val config: Map[String, Any]) extends La
       list.sequence[Checked, Unit].void
     }
 
-    lazy val wdlNamespaceValidation: ErrorOr[WdlNamespaceWithWorkflow] = namespaces.get(workflowSource.md5Sum, new Callable[ErrorOr[WdlNamespaceWithWorkflow]] {
+    def workflowHashKey: String = {
+      workflowSource.md5Sum + (source.importsZipFileOption map { bytes => new String(MessageDigest.getInstance("MD5").digest(bytes)) }).getOrElse("")
+    }
+
+    lazy val wdlNamespaceValidation: ErrorOr[WdlNamespaceWithWorkflow] = namespaces.get(workflowHashKey, new Callable[ErrorOr[WdlNamespaceWithWorkflow]] {
       def call: ErrorOr[WdlNamespaceWithWorkflow] = source match {
         case w: WorkflowSourceFilesWithDependenciesZip =>
           for {
